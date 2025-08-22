@@ -110,7 +110,7 @@ class CocosZipInstaller(object):
             print("==> version file doesn't exist")
 
     def get_input_value(self, prompt):
-        ret = raw_input(prompt)
+        ret = input(prompt)
         ret.rstrip(" \t")
         return ret
 
@@ -121,10 +121,11 @@ class CocosZipInstaller(object):
         except OSError:
             pass
         print("==> Ready to download '%s' from '%s'" % (self._filename, self._url))
-        import urllib2
+        import urllib.request
+        import urllib.error
         try:
-            u = urllib2.urlopen(self._url)
-        except urllib2.HTTPError as e:
+            u = urllib.request.urlopen(self._url)
+        except urllib.error.HTTPError as e:
             if e.code == 404:
                 print("==> Error: Could not find the file from url: '%s'" % (self._url))
             print("==> Http request failed, error code: " + str(e.code) + ", reason: " + e.read())
@@ -154,7 +155,7 @@ class CocosZipInstaller(object):
         while True:
             buffer = u.read(block_sz)
             if not buffer:
-                print("%s%s" % (" " * len(status), "\r")),
+                print("%s%s" % (" " * len(status), "\r"), end="")
                 break
 
             file_size_dl += len(buffer)
@@ -168,9 +169,9 @@ class CocosZipInstaller(object):
                     status = r"Downloaded: %6dK / Total: %dK, Percent: %3.2f%%, Speed: %6.2f KB/S " % (file_size_dl / 1000, file_size / 1000, percent, speed)
                 else:
                     status = r"Downloaded: %6dK, Speed: %6.2f KB/S " % (file_size_dl / 1000, speed)
-                print(status),
+                print(status, end="")
                 sys.stdout.flush()
-                print("\r"),
+                print("\r", end="")
                 block_size_per_second = 0
                 old_time = new_time
 
@@ -246,7 +247,8 @@ class CocosZipInstaller(object):
             self.download_zip_file()
 
     def download_file_with_retry(self, times, delay):
-        import urllib2
+        import urllib.request
+        import urllib.error
         times_count = 0
         while(times_count < times):
             times_count += 1
@@ -341,9 +343,9 @@ class CocosZipInstaller(object):
 
 def _check_python_version():
     major_ver = sys.version_info[0]
-    if major_ver > 2:
-        print ("The python version is %d.%d. But python 2.x is required. (Version 2.7 is well tested)\n"
-               "Download it here: https://www.python.org/" % (major_ver, sys.version_info[1]))
+    if major_ver < 3:
+        print("The python version is %d.%d. But python 3.x is required.\n"
+              "Download it here: https://www.python.org/" % (major_ver, sys.version_info[1]))
         return False
 
     return True
